@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class OtoDomOfferFinder extends AbstractOfferFinder {
@@ -31,10 +29,18 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 	
 	@Override
 	protected Collection<Offer> searchOffers() {
+		agreeTocookies();
 		setupSearchCriteria();
 		search();
 		sortResultsByDate();
 		return getFoundOffers();
+	}
+
+	private void agreeTocookies() {
+		wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("onetrust-accept-btn-handler"))));
+		WebElement agreeButton = driver.findElement(By.id("onetrust-accept-btn-handler"));
+		wait.until(ExpectedConditions.elementToBeClickable(agreeButton));
+		agreeButton.click();
 	}
 
 	private void setupSearchCriteria() {
@@ -42,7 +48,7 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 		setForSale();
 		setPrice();
 		setArea();
-		setRoomsQunatity();
+		setRoomsQuantity();
 		setMarket();
 		setCities();
 	}
@@ -50,6 +56,7 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 	private void setFlats() {
 		WebElement typeDropbox = driver.findElement(By.id("downshift-1-toggle-button"));
 		wait.until(ExpectedConditions.elementToBeClickable(typeDropbox));
+		actions.moveToElement(typeDropbox);
 		typeDropbox.click();
 		WebElement firstListElement = driver.findElement(By.id("downshift-1-item-0"));
 		firstListElement.click();
@@ -57,6 +64,7 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 
 	private void setForSale() {
 		WebElement saleDropbox = driver.findElement(By.id("downshift-2-toggle-button"));
+		actions.moveToElement(saleDropbox);
 		saleDropbox.click();
 		WebElement firstListElement = driver.findElement(By.id("downshift-2-item-0"));
 		firstListElement.click();
@@ -81,7 +89,7 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 		maxInput.sendKeys(MAX_AREA);
 	}
 
-	private void setRoomsQunatity() {
+	private void setRoomsQuantity() {
 		WebElement roomsButton = driver.findElement(By.xpath("//button[@aria-label='Liczba pokoi']"));
 		roomsButton.click();
 		WebElement twoRoomsOption = driver.findElement(By.xpath("//p[text()='" + ROOMS + "']"));
@@ -128,7 +136,10 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 	}
 
 	private Collection<Offer> getFoundOffers() {
-		wait.until(ExpectedConditions.stalenessOf(driver.findElement(By.xpath("//article"))));
+		try {
+			wait.until(ExpectedConditions.stalenessOf(driver.findElement(By.xpath("//article"))));
+		}
+		catch(TimeoutException | NoSuchElementException e) {}
 		List<WebElement> foundOffers = driver.findElements(By.xpath("//article"));
 		return foundOffers.stream()
 						  .map(elementsToOfferMapper)

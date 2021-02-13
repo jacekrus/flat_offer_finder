@@ -25,12 +25,12 @@ public abstract class AbstractOfferFinder implements OfferFinder {
 
 	protected AbstractOfferFinder(WebDriver driver) {
 		this.driver = driver;
-		wait = new WebDriverWait(driver, 10);
+		wait = new WebDriverWait(driver, 25);
 		actions = new Actions(driver);
 	}
 
 	@Override
-	public Collection<Offer> getOffers() throws IOException {
+	public Collection<Offer> getOffers() {
 		openPage(getSite().getUrl());
 		maximizeWindow();
 		return searchOffers();
