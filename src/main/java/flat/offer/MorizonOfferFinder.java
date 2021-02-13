@@ -7,9 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class MorizonOfferFinder extends AbstractOfferFinder {
@@ -54,13 +52,18 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		setPrice();
 		openMoreOptions();
 		setArea();
-		setRoomsQunatity();
+		setRoomsQuantity();
 		setMarket();
 	}
 	
 	private void agreeToCookies() {
-		wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("qc-cmp2-ui"))));
-		WebElement agreeButton = driver.findElement(By.xpath("//button[text()='ZGADZAM SIĘ']"));
+		try {
+			wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("qc-cmp2-ui"))));
+		}
+		catch(NoSuchElementException e) {
+			return;
+		}
+		WebElement agreeButton = driver.findElement(By.xpath("//button[contains(text(), 'ZGADZAM')]"));
 		wait.until(ExpectedConditions.elementToBeClickable(agreeButton));
 		agreeButton.click();
 	}
@@ -68,15 +71,17 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 	private void setFlats() {
 		WebElement typeDropbox = driver.findElement(By.xpath("//p[text()='ieszkania']"));
 		wait.until(ExpectedConditions.elementToBeClickable(typeDropbox));
-		typeDropbox.click();
+		actions.moveToElement(typeDropbox).click().perform();
 		WebElement firstListElement = driver.findElement(By.xpath("//li[text()='ieszkania']"));
-		firstListElement.click();
+		wait.until(ExpectedConditions.elementToBeClickable(firstListElement));
+		actions.moveToElement(firstListElement).click().perform();
 	}
 
 	private void setForSale() {
-		WebElement saleDropbox = driver.findElement(By.xpath("//p[text()='przedaż']"));
+		WebElement saleDropbox = driver.findElement(By.xpath("//p[contains(text(), 'przeda')]"));
+		actions.moveToElement(saleDropbox);
 		saleDropbox.click();
-		WebElement firstListElement = driver.findElement(By.xpath("//li[text()='przedaż']"));
+		WebElement firstListElement = driver.findElement(By.xpath("//li[contains(text(), 'przeda')]"));
 		firstListElement.click();
 	}
 
@@ -95,6 +100,8 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 
 	private void setArea() {
 		WebElement minInput = driver.findElement(By.id("ps_living_area_from"));
+		wait.until(ExpectedConditions.visibilityOf(minInput));
+		actions.moveToElement(minInput);
 		minInput.click();
 		minInput.sendKeys(MIN_AREA);
 		WebElement maxInput = driver.findElement(By.id("ps_living_area_to"));
@@ -102,14 +109,14 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		maxInput.sendKeys(MAX_AREA);
 	}
 
-	private void setRoomsQunatity() {
+	private void setRoomsQuantity() {
 		WebElement roomsNumberInput = driver.findElement(By.id("ps_number_of_rooms_from"));
 		roomsNumberInput.click();
 		roomsNumberInput.sendKeys(ROOMS);
 	}
 
 	private void setMarket() {
-		WebElement secondaryMarketCheckbox = driver.findElement(By.xpath("//label[text()='Wtórny']/preceding-sibling::div"));
+		WebElement secondaryMarketCheckbox = driver.findElement(By.xpath("//label[contains(text(), 'rny')]/preceding-sibling::div"));
 		secondaryMarketCheckbox.click();
 	}
 
@@ -127,7 +134,10 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 	private void search() {
 		WebElement searchButton = driver.findElement(By.name("commit"));
 		searchButton.click();
-		wait.until(ExpectedConditions.stalenessOf(searchButton));
+		try {
+			wait.until(ExpectedConditions.stalenessOf(searchButton));
+		}
+		catch(TimeoutException e) {}
 	}
 
 	private void sortResultsByDate() {
@@ -146,7 +156,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 	}
 	
 	private LocalDate parseDate(String dateText, DateTimeFormatter formatter) {
-		LocalDate date = null;
+		LocalDate date;
 		try {
 			date = LocalDate.parse(dateText, formatter);
 		}
