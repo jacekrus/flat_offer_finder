@@ -36,9 +36,14 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		agreeToCookies();
 		setupSearchCriteria();
 		List<Offer> offers = new ArrayList<>();
+		boolean lendiClosed = false;
 		for(String city : cities) {
 			setCity(city);
 			search();
+			if(!lendiClosed) {
+				closeLendiOverlay();
+				lendiClosed = true;
+			}
 			sortResultsByDate();
 			offers.addAll(getFoundOffers());
 			deleteCity();
@@ -57,15 +62,20 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 	}
 	
 	private void agreeToCookies() {
-		try {
-			wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("qc-cmp2-ui"))));
-		}
-		catch(NoSuchElementException e) {
-			return;
+		for(int i = 0; i < 5; i++) {
+			try {
+				wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("qc-cmp2-ui"))));
+				break;
+			}
+			catch(NoSuchElementException e) {
+				try {
+					Thread.sleep(5 * 1000);
+				} catch (InterruptedException ex) {}
+			}
 		}
 		WebElement agreeButton = driver.findElement(By.xpath("//button[contains(text(), 'ZGADZAM')]"));
 		wait.until(ExpectedConditions.elementToBeClickable(agreeButton));
-		agreeButton.click();
+		actions.moveToElement(agreeButton).click().perform();
 	}
 
 	private void setFlats() {
@@ -140,9 +150,16 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		catch(TimeoutException e) {}
 	}
 
+	private void closeLendiOverlay() {
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("lendiOverlay")));
+		WebElement lendiOverlay = driver.findElement((By.className("lendiOverlay")));
+		WebElement closeButton = lendiOverlay.findElement(By.xpath("./span[contains(@class, 'close')]"));
+		wait.until(ExpectedConditions.elementToBeClickable(closeButton));
+		closeButton.click();
+	}
+
 	private void sortResultsByDate() {
 		WebElement sortButton = driver.findElement(By.xpath("//a[text()='Najnowsze']"));
-		wait.until(ExpectedConditions.elementToBeClickable(sortButton));
 		sortButton.click();
 	}
 
