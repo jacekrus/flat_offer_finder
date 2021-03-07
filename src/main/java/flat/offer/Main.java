@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 public class Main {
 
@@ -20,7 +21,9 @@ public class Main {
 	}
 
 	private static void scanOffers() {
-		ChromeDriver webDriver = new ChromeDriver();
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--headless", "--window-size=1920,1200");
+		ChromeDriver webDriver = new ChromeDriver(options);
 		try {
 			List<OfferFinder> finders = List.of(new OtoDomOfferFinder(webDriver), new MorizonOfferFinder(webDriver));
 			OfferEvaluator offerEvaluator = new OfferEvaluator(new OfferFileStorageHandler(), new MailSender());
