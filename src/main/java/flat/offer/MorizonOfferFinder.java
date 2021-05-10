@@ -73,7 +73,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 				} catch (InterruptedException ex) {}
 			}
 		}
-		WebElement agreeButton = driver.findElement(By.xpath("//button[contains(text(), 'ZGADZAM')]"));
+		WebElement agreeButton = driver.findElement(By.xpath("//button[contains(@class, 'cmp-intro_acceptAll')]"));
 		wait.until(ExpectedConditions.elementToBeClickable(agreeButton));
 		actions.moveToElement(agreeButton).click().perform();
 	}
