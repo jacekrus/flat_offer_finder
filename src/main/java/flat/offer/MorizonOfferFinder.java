@@ -69,7 +69,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 			}
 			catch(NoSuchElementException e) {
 				try {
-					Thread.sleep(5 * 1000);
+					Thread.sleep(1000);
 				} catch (InterruptedException ex) {}
 			}
 		}
