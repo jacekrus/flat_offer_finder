@@ -2,8 +2,8 @@ package flat.offer;
 
 public enum Site {
 	
-	OTODOM("https://www.otodom.pl/"),
-	MORIZON("https://www.morizon.pl/");
+	OTODOM("https://www.otodom.pl"),
+	MORIZON("https://www.morizon.pl");
 	
 	private final String url;
 	
