@@ -13,7 +13,7 @@ public abstract class AbstractOfferFinder implements OfferFinder {
 
 	public static final String MAX_PRICE = "230000";
 	public static final String MIN_AREA = "35";
-	public static final String MAX_AREA = "52";
+	public static final String MAX_AREA = "55";
 	public static final String ROOMS = "2";
 
 	protected final WebDriver driver;
@@ -21,7 +21,7 @@ public abstract class AbstractOfferFinder implements OfferFinder {
 	protected Actions actions;
 	protected Site site;
 	protected Function<WebElement, Offer> elementsToOfferMapper;
-	protected String[] cities = { "Katowice", "Gliwice", "Tarnowskie Góry" };
+	protected String[] cities = { "Radzionków", "Piekary Œl¹skie", "Bytom", "Tarnowskie Góry" };
 
 	protected AbstractOfferFinder(WebDriver driver) {
 		this.driver = driver;

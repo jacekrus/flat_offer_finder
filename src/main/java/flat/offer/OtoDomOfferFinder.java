@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.thoughtworks.selenium.webdriven.commands.Close;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -15,10 +16,9 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 		elementsToOfferMapper = el -> {
 			wait.until(ExpectedConditions.visibilityOf(el));
 			actions.moveToElement(el);
-			String id = getSite().toString() + "-" + el.getAttribute("data-item-id");
-			String url = el.getAttribute("data-url");
-			boolean isPromo = el.getAttribute("data-featured-name").equals("promo_top_ads");
-			return new Offer(id, url, isPromo);
+			String url = el.getAttribute("href");
+			String id = url.substring(url.lastIndexOf("-"));
+			return new Offer(id, url, false);
 		};
 	}
 
@@ -29,14 +29,15 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 	
 	@Override
 	protected Collection<Offer> searchOffers() {
-		agreeTocookies();
+		agreeToCookies();
 		setupSearchCriteria();
 		search();
+		discardInfoPopup();
 		sortResultsByDate();
 		return getFoundOffers();
 	}
 
-	private void agreeTocookies() {
+	private void agreeToCookies() {
 		wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("onetrust-accept-btn-handler"))));
 		WebElement agreeButton = driver.findElement(By.id("onetrust-accept-btn-handler"));
 		wait.until(ExpectedConditions.elementToBeClickable(agreeButton));
@@ -127,20 +128,20 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 		searchButton.click();
 	}
 
+
+	private void discardInfoPopup() {
+		WebElement closeButton = driver.findElement(By.cssSelector("[aria-label='Zamknij']"));
+		closeButton.click();
+	}
+
 	private void sortResultsByDate() {
-		WebElement sortMenu = driver.findElement(By.id("sortMenu"));
-		wait.until(ExpectedConditions.visibilityOf(sortMenu));
-		sortMenu.click();
-		WebElement sortCriteriaDate = driver.findElement(By.id("sort_date_adding_newest"));
+		WebElement sortCriteriaDate = driver.findElement(By.xpath("//button[contains(text(), 'najnowsze')]"));
 		sortCriteriaDate.click();
 	}
 
 	private Collection<Offer> getFoundOffers() {
-		try {
-			wait.until(ExpectedConditions.stalenessOf(driver.findElement(By.xpath("//article"))));
-		}
-		catch(TimeoutException | NoSuchElementException e) {}
-		List<WebElement> foundOffers = driver.findElements(By.xpath("//article"));
+		List<WebElement> offersLists = driver.findElements(By.cssSelector("div[data-cy='search.listing']"));
+		List<WebElement> foundOffers = offersLists.get(1).findElements(By.xpath("./ul/li/a"));
 		return foundOffers.stream()
 						  .map(elementsToOfferMapper)
 						  .filter(Predicate.not(Offer::isPromo))
