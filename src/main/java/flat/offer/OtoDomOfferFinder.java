@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -27,13 +28,13 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 	}
 	
 	@Override
-	protected Collection<Offer> searchOffers() {
+	protected Collection<Pair<String, List<Offer>>> searchOffers() {
 		agreeToCookies();
 		setupSearchCriteria();
 		search();
 		discardInfoPopup();
 		sortResultsByDate();
-		return getFoundOffers();
+		return List.of(Pair.of("All", getFoundOffers()));
 	}
 
 	private void agreeToCookies() {
@@ -138,13 +139,13 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 		sortCriteriaDate.click();
 	}
 
-	private Collection<Offer> getFoundOffers() {
+	private List<Offer> getFoundOffers() {
 		List<WebElement> offersLists = driver.findElements(By.cssSelector("div[data-cy='search.listing']"));
 		List<WebElement> foundOffers = offersLists.get(1).findElements(By.xpath("./ul/li/a"));
 		return foundOffers.stream()
 						  .map(elementsToOfferMapper)
 						  .filter(Predicate.not(Offer::isPromo))
-						  .limit(20)
+						  .limit(60)
 						  .collect(Collectors.toList());
 	}
 

@@ -7,11 +7,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class MorizonOfferFinder extends AbstractOfferFinder {
-	
+
 	public MorizonOfferFinder(WebDriver driver) {
 		super(driver);
 		elementsToOfferMapper = el -> {
@@ -25,17 +26,17 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 			return new Offer(id, url, date);
 		};
 	}
-	
+
 	@Override
 	public Site getSite() {
 		return Site.MORIZON;
 	}
 
 	@Override
-	protected Collection<Offer> searchOffers() {
+	protected Collection<Pair<String,List<Offer>>> searchOffers() {
 		agreeToCookies();
 		setupSearchCriteria();
-		List<Offer> offers = new ArrayList<>();
+		List<Pair<String,List<Offer>>> offers = new ArrayList<>();
 		boolean lendiClosed = false;
 		for(String city : cities) {
 			setCity(city);
@@ -45,10 +46,10 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 				lendiClosed = true;
 			}
 			sortResultsByDate();
-			offers.addAll(getFoundOffers());
+			offers.add(Pair.of(city, getFoundOffers()));
 			deleteCity();
 		}
-		return offers.stream().sorted((o1, o2) -> o2.getDate().compareTo(o1.getDate())).limit(20).collect(Collectors.toList());
+		return offers;
 	}
 
 	private void setupSearchCriteria() {
@@ -60,7 +61,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		setRoomsQuantity();
 		setMarket();
 	}
-	
+
 	private void agreeToCookies() {
 		for(int i = 0; i < 5; i++) {
 			try {
@@ -102,7 +103,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		priceInput.click();
 		priceInput.sendKeys(MAX_PRICE);
 	}
-	
+
 	private void openMoreOptions() {
 		WebElement moreOptions = driver.findElement(By.xpath("//div[@class='moreOptions']"));
 		moreOptions.click();
@@ -135,7 +136,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		cityInput.click();
 		cityInput.sendKeys(cityName);
 	}
-	
+
 	private void deleteCity() {
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("deleteLocation")));
 		WebElement clearCity = driver.findElement(By.id("deleteLocation"));
@@ -161,7 +162,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		sortButton.click();
 	}
 
-	private Collection<Offer> getFoundOffers() {
+	private List<Offer> getFoundOffers() {
 		List<WebElement> foundOfferElements = driver.findElements(By.xpath("//section/div[contains(@class, 'row--property-list')]"));
 		return foundOfferElements.stream()
 				.filter(el -> el.getAttribute("data-id") != null)
@@ -169,7 +170,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 				.limit(20)
 				.collect(Collectors.toList());
 	}
-	
+
 	private LocalDate parseDate(String dateText, DateTimeFormatter formatter) {
 		if(dateText.equals("dzisiaj")) {
 			return LocalDate.now();

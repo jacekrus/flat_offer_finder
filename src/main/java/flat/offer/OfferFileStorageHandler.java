@@ -20,16 +20,16 @@ public class OfferFileStorageHandler {
 		tempLocation = System.getProperty("java.io.tmpdir");
 	}
 
-	public void createOrUpdateOffersFileForSite(Site site, Collection<Offer> offers) throws IOException, OfferFinderException {
-		File offersFile = getFileForSite(site);
+	public void createOrUpdateOffersFileForId(String fileId, Collection<Offer> offers) throws IOException, OfferFinderException {
+		File offersFile = getFileForId(fileId);
 		if (offersFile.exists()) {
 			Files.delete(offersFile.toPath());
 		}
 		writeOffersToFile(offersFile, offers);
 	}
 
-	public Collection<String> getOfferIdsForSite(Site site) throws OfferFinderException {
-		File offersFile = getFileForSite(site);
+	public Collection<String> getOfferIdsForFileId(String fileId) throws OfferFinderException {
+		File offersFile = getFileForId(fileId);
 		if (offersFile.exists()) {
 			try (Scanner scanner = new Scanner(offersFile)) {
 				List<String> ids = new ArrayList<>();
@@ -39,14 +39,14 @@ public class OfferFileStorageHandler {
 				}
 				return ids;
 			} catch (Exception e) {
-				throw new OfferFinderException("Exception occured while processing offers file for site " + site.toString() + ".", e);
+				throw new OfferFinderException("Exception occurred while processing offers file " + fileId + ".", e);
 			}
 		}
 		return Collections.emptyList();
 	}
 
-	private File getFileForSite(Site site) {
-		return new File(tempLocation + File.separator + site.toString() + ".txt");
+	private File getFileForId(String id) {
+		return new File(tempLocation + File.separator + id + ".txt");
 	}
 
 	private void writeOffersToFile(File file, Collection<Offer> offers) throws OfferFinderException {
@@ -57,7 +57,7 @@ public class OfferFileStorageHandler {
 				bw.newLine();
 			}
 		} catch (IOException e) {
-			throw new OfferFinderException("Exception occured while saving offers to file '" + file.getName() + "'.", e);
+			throw new OfferFinderException("Exception occurred while saving offers to file '" + file.getName() + "'.", e);
 		}
 	}
 

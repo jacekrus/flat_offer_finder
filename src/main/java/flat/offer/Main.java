@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -31,7 +32,7 @@ public class Main {
             OfferEvaluator offerEvaluator = new OfferEvaluator(new OfferFileStorageHandler(), new MailSender());
             for (OfferFinder finder : finders) {
                 LOG.info("Starting to look for new offers on " + finder.getSite().toString() + "...");
-                Collection<Offer> offers = finder.getOffers();
+                Collection<Pair<String, List<Offer>>> offers = finder.getOffers();
                 offerEvaluator.evaluateFoundOffers(finder.getSite(), offers);
             }
             LOG.info("Finishing execution...");

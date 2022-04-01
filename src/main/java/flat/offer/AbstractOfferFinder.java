@@ -1,8 +1,10 @@
 package flat.offer;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -29,13 +31,13 @@ public abstract class AbstractOfferFinder implements OfferFinder {
 	}
 
 	@Override
-	public Collection<Offer> getOffers() {
+	public Collection<Pair<String, List<Offer>>> getOffers() {
 		openPage(getSite().getUrl());
 		maximizeWindow();
 		return searchOffers();
 	}
 
-	protected abstract Collection<Offer> searchOffers();
+	protected abstract Collection<Pair<String, List<Offer>>> searchOffers();
 
 	private void openPage(String url) {
 		driver.get(url);
