@@ -137,6 +137,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 	}
 	
 	private void deleteCity() {
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("deleteLocation")));
 		WebElement clearCity = driver.findElement(By.id("deleteLocation"));
 		clearCity.click();
 	}
@@ -144,10 +145,7 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 	private void search() {
 		WebElement searchButton = driver.findElement(By.name("commit"));
 		searchButton.click();
-		try {
-			wait.until(ExpectedConditions.stalenessOf(searchButton));
-		}
-		catch(TimeoutException e) {}
+		wait.until(ExpectedConditions.stalenessOf(searchButton));
 	}
 
 	private void closeLendiOverlay() {
@@ -173,14 +171,12 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 	}
 	
 	private LocalDate parseDate(String dateText, DateTimeFormatter formatter) {
-		LocalDate date;
-		try {
-			date = LocalDate.parse(dateText, formatter);
+		if(dateText.equals("dzisiaj")) {
+			return LocalDate.now();
+		} else if(dateText.equals("wczoraj")) {
+			return LocalDate.now().minusDays(1);
 		}
-		catch(Exception e) {
-			date = LocalDate.now();
-		}
-		return date;
+		return LocalDate.parse(dateText, formatter);
 	}
 
 }
