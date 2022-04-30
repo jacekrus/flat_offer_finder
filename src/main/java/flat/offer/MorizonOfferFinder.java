@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class MorizonOfferFinder extends AbstractOfferFinder {
+
+	private static final Logger LOG = Logger.getLogger(MorizonOfferFinder.class);
 
 	public MorizonOfferFinder(WebDriver driver) {
 		super(driver);
@@ -37,15 +40,10 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		agreeToCookies();
 		setupSearchCriteria();
 		List<Pair<String,List<Offer>>> offers = new ArrayList<>();
-		boolean lendiClosed = false;
 		for(String city : cities) {
 			setCity(city);
 			search();
-			if(!lendiClosed) {
-				closeLendiOverlay();
-				lendiClosed = true;
-			}
-			sortResultsByDate();
+			sortResultsByDate(city);
 			offers.add(Pair.of(city, getFoundOffers()));
 			deleteCity();
 		}
@@ -149,17 +147,13 @@ public class MorizonOfferFinder extends AbstractOfferFinder {
 		wait.until(ExpectedConditions.stalenessOf(searchButton));
 	}
 
-	private void closeLendiOverlay() {
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("lendiOverlay")));
-		WebElement lendiOverlay = driver.findElement((By.className("lendiOverlay")));
-		WebElement closeButton = lendiOverlay.findElement(By.xpath("./span[contains(@class, 'close')]"));
-		wait.until(ExpectedConditions.elementToBeClickable(closeButton));
-		closeButton.click();
-	}
-
-	private void sortResultsByDate() {
-		WebElement sortButton = driver.findElement(By.xpath("//a[text()='Najnowsze']"));
-		sortButton.click();
+	private void sortResultsByDate(String city) {
+		try {
+			WebElement sortButton = driver.findElement(By.xpath("//a[text()='Najnowsze']"));
+			sortButton.click();
+		} catch(NoSuchElementException e) {
+			LOG.info("Could not locate button, possibly no offers meeting the criteria found for city: " + city + ".");
+		}
 	}
 
 	private List<Offer> getFoundOffers() {

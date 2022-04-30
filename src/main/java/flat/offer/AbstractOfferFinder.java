@@ -22,7 +22,7 @@ public abstract class AbstractOfferFinder implements OfferFinder {
 	protected Actions actions;
 	protected Site site;
 	protected Function<WebElement, Offer> elementsToOfferMapper;
-	protected String[] cities = { "Radzionków", "Piekary Œl¹skie", "Bytom", "Tarnowskie Góry" };
+	protected String[] cities = { "Bytom", "Piekary Œl¹skie", "Tarnowskie Góry", "Radzionków" };
 
 	protected AbstractOfferFinder(WebDriver driver) {
 		this.driver = driver;
