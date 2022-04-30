@@ -13,6 +13,7 @@ public class OtoDomOfferFinder extends AbstractOfferFinder {
 	
 	public OtoDomOfferFinder(WebDriver driver) {
 		super(driver);
+
 		elementsToOfferMapper = el -> {
 			wait.until(ExpectedConditions.visibilityOf(el));
 			actions.moveToElement(el);
